@@ -25,6 +25,11 @@ public static class XmlDocValidator
 
         foreach (var _file in _csFiles)
         {
+            if (Path.GetExtension(_file).Equals(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var _lines = File.ReadAllLines(_file);
             for (var _i = 0; _i < _lines.Length; _i++)
             {

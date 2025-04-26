@@ -30,6 +30,11 @@ public static class TestCoverageValidator
 
         foreach (var _file in _sourceFiles)
         {
+            if (Path.GetExtension(_file).Equals(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var _className = Path.GetFileNameWithoutExtension(_file);
             var _lines = File.ReadAllLines(_file);
             var _content = File.ReadAllText(_file);

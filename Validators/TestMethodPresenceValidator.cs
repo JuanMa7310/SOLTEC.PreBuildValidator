@@ -30,6 +30,11 @@ public static class TestMethodPresenceValidator
 
         foreach (var _file in _testFiles)
         {
+            if (Path.GetExtension(_file).Equals(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var _content = File.ReadAllText(_file);
             var _lines = _content.Split('\n');
 

@@ -20,7 +20,7 @@ public static class Program
     public static void Main()
     {
         var _csolutionDirectory = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")
-                                ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../.."));
+                                ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         bool _success = true;
 
         Console.OutputEncoding = System.Text.Encoding.UTF8;

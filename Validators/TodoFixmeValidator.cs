@@ -23,6 +23,11 @@ public static class TodoFixmeValidator
 
         foreach (var _file in _csFiles)
         {
+            if (Path.GetExtension(_file).Equals(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             Console.WriteLine($"📝 Checking TODO/FIXME in file: {_file}...");
             var _lines = File.ReadAllLines(_file);
 
