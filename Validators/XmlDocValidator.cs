@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using SOLTEC.PreBuildValidator.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace SOLTEC.PreBuildValidator.Validators;
 
@@ -13,47 +14,134 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static class XmlDocValidator
 {
+    ///// <summary>
+    ///// Performs XML documentation validation across all .cs files in the given solution directory.
+    ///// </summary>
+    ///// <param name="solutionDirectory">Path to the root directory of the solution.</param>
+    //public static void ValidateXmlDocumentation(string solutionDirectory)
+    //{
+    //    Console.WriteLine("🔍 Starting Checking XML documentation...");
+
+    //    var _csFiles = Directory.GetFiles(solutionDirectory, "*.cs", SearchOption.AllDirectories);
+
+    //    foreach (var _file in _csFiles)
+    //    {
+    //        var _lines = File.ReadAllLines(_file);
+    //        for (var _i = 0; _i < _lines.Length; _i++)
+    //        {
+    //            var _line = _lines[_i].Trim();
+
+    //            // Check for public class or struct or interface
+    //            if (Regex.IsMatch(_line, @"^(public\s+)?(class|struct|interface)\s+\w"))
+    //            {
+    //                if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
+    //                {
+    //                    Console.WriteLine($"❌ {_file}: Public class/interface/struct missing XML documentation at line {_i + 1}");
+    //                }
+    //            }
+
+    //            // Check for public method
+    //            if (Regex.IsMatch(_line, @"^public\s+(static\s+)?(\w+[\<\>\[\]]*\s+)+\w+\s*\("))
+    //            {
+    //                if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
+    //                {
+    //                    Console.WriteLine($"❌ {_file}: Public method missing XML documentation at line {_i + 1}");
+    //                }
+    //            }
+
+    //            // Optional: check for duplicate or malformed XML comments
+    //            if (_line.StartsWith("///") && !_line.Contains("<summary>") && !_line.Contains("</summary>") && !_line.Contains("<") && !_line.Contains(">"))
+    //            {
+    //                Console.WriteLine($"⚠️ {_file}: Possible malformed XML documentation at line {_i + 1}");
+    //            }
+    //        }
+    //    }
+    //}
+    private static readonly Regex _publicProtectedMemberRegex = new(@"\b(public|protected)\s+(class|interface|struct|enum|delegate|void|\w+)\s+\w+", RegexOptions.Compiled);
+    private static readonly Regex _xmlDocCommentRegex = new(@"^\s*///", RegexOptions.Compiled);
+
     /// <summary>
-    /// Performs XML documentation validation across all .cs files in the given solution directory.
+    /// Validates that XML documentation exists for public/protected classes, methods, and properties.
     /// </summary>
-    /// <param name="solutionDirectory">Path to the root directory of the solution.</param>
-    public static void ValidateXmlDocumentation(string solutionDirectory)
+    /// <param name="solutionDirectory">Root directory of the solution.</param>
+    /// <param name="projectName">Name of the main project.</param>
+    /// <exception cref="ValidationException">Thrown if missing XML documentation is found.</exception>
+    public static void ValidateXmlDocumentation(string solutionDirectory, string projectName)
     {
-        Console.WriteLine("🔍 Starting Checking XML documentation...");
+        Console.WriteLine("Starting XML documentation validation...");
 
-        var _csFiles = Directory.GetFiles(solutionDirectory, "*.cs", SearchOption.AllDirectories);
+        var _projectPath = Path.Combine(solutionDirectory, projectName);
 
-        foreach (var _file in _csFiles)
+        if (!Directory.Exists(_projectPath))
         {
-            var _lines = File.ReadAllLines(_file);
-            for (var _i = 0; _i < _lines.Length; _i++)
+            throw new ValidationException($"XML documentation validation failed: Project path '{_projectPath}' not found.");
+        }
+
+        var _projectFiles = Directory.GetFiles(_projectPath, "*.cs", SearchOption.AllDirectories)
+            .Where(f => !IsGeneratedFile(f))
+            .ToList();
+
+        if (_projectFiles.Count == 0)
+        {
+            Console.WriteLine("No source files found to validate XML documentation.");
+            return;
+        }
+
+        var _membersMissingDoc = new List<string>();
+
+        foreach (var _filePath in _projectFiles)
+        {
+            var _lines = File.ReadAllLines(_filePath);
+
+            for (int _length = 0; _length < _lines.Length; _length++)
             {
-                var _line = _lines[_i].Trim();
+                var _line = _lines[_length];
 
-                // Check for public class or struct or interface
-                if (Regex.IsMatch(_line, @"^(public\s+)?(class|struct|interface)\s+\w"))
+                if (_publicProtectedMemberRegex.IsMatch(_line))
                 {
-                    if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
+                    bool _hasXmlDoc = false;
+
+                    // Look backwards to see if there's a "///" comment immediately above
+                    for (int _j = _length - 1; _j >= 0; _j--)
                     {
-                        Console.WriteLine($"❌ {_file}: Public class/interface/struct missing XML documentation at line {_i + 1}");
-                    }
-                }
+                        var _previousLine = _lines[_j].Trim();
 
-                // Check for public method
-                if (Regex.IsMatch(_line, @"^public\s+(static\s+)?(\w+[\<\>\[\]]*\s+)+\w+\s*\("))
-                {
-                    if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
+                        if (string.IsNullOrWhiteSpace(_previousLine))
+                            continue;
+
+                        if (_xmlDocCommentRegex.IsMatch(_previousLine))
+                        {
+                            _hasXmlDoc = true;
+                            break;
+                        }
+
+                        // If we find a non-comment line before a "///", assume missing doc
+                        break;
+                    }
+
+                    if (!_hasXmlDoc)
                     {
-                        Console.WriteLine($"❌ {_file}: Public method missing XML documentation at line {_i + 1}");
+                        _membersMissingDoc.Add($"{Path.GetFileName(_filePath)}: Line {_length + 1} - {_line.Trim()}");
                     }
-                }
-
-                // Optional: check for duplicate or malformed XML comments
-                if (_line.StartsWith("///") && !_line.Contains("<summary>") && !_line.Contains("</summary>") && !_line.Contains("<") && !_line.Contains(">"))
-                {
-                    Console.WriteLine($"⚠️ {_file}: Possible malformed XML documentation at line {_i + 1}");
                 }
             }
         }
+
+        if (_membersMissingDoc.Count != 0)
+        {
+            throw new ValidationException(
+                $"XML documentation validation failed: Missing documentation for the following members:\n{string.Join("\n", _membersMissingDoc)}"
+            );
+        }
+
+        Console.WriteLine("XML documentation validation passed.");
+    }
+
+    private static bool IsGeneratedFile(string filePath)
+    {
+        var _fileName = Path.GetFileName(filePath);
+        return _fileName.EndsWith(".Designer.cs", StringComparison.OrdinalIgnoreCase) ||
+               _fileName.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ||
+               _fileName.EndsWith(".AssemblyInfo.cs", StringComparison.OrdinalIgnoreCase);
     }
 }
