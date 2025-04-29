@@ -1,31 +1,71 @@
-﻿# Instrucciones para los Scripts - SOLTEC.PreBuildValidator
+# SOLTEC.PreBuildValidator - Guía de Ejecución Manual
 
-Esta carpeta incluye dos scripts para compilar y ejecutar la herramienta de validación previa a la compilación.
+## 📚 Propósito
 
-Están diseñados para funcionar **sin importar desde qué carpeta se ejecuten**.
+Este documento explica cómo ejecutar manualmente el **SOLTEC.PreBuildValidator** sin depender del proceso de compilación.
 
-## 🚀 Windows
+Es útil para realizar validaciones independientes durante el desarrollo, en pipelines de CI/CD, o antes de hacer un merge en la rama principal.
 
-Para ejecutar el validador:
-```
-run-validator.bat
-```
+---
 
-Este script:
-1. Cambia a la carpeta del propio script
-2. Compila el proyecto con `dotnet build`
-3. Ejecuta el DLL resultante del validador
+## 🚀 Cómo Ejecutarlo
 
-## 🐧 Linux/macOS
+Para ejecutar el validador manualmente, debes ejecutar el ejecutable **y proporcionar el nombre del proyecto como argumento**.
 
-Haz que el script sea ejecutable:
+### 🎯 Ejemplo de Comando
+
 ```bash
-chmod +x run-validator.sh
+SOLTEC.PreBuildValidator.exe SOLTEC.Core
 ```
 
-Luego ejecuta:
-```bash
-./run-validator.sh
+Donde:
+- `SOLTEC.Core` es el nombre de la carpeta del proyecto y del archivo `.csproj` que deseas validar.
+
+✅ **Proporcionar el nombre del proyecto es obligatorio**.  
+✅ **Si no se proporciona este argumento, el validador mostrará un error y finalizará.**
+
+---
+
+## 📋 Qué Sucede Durante la Ejecución
+
+Cuando ejecutas el validador:
+
+1. Validará la estructura y el código del proyecto.
+2. Validará:
+   - La presencia de `<LangVersion>` en el `.csproj`.
+   - La cobertura de pruebas para las clases públicas/protegidas.
+   - La existencia de métodos de prueba para métodos públicos/protegidos.
+   - La ausencia de comentarios TODO/FIXME.
+   - La documentación XML de clases, métodos y propiedades públicas/protegidas.
+
+---
+
+## 🛑 Manejo de Fallos
+
+Si alguna validación falla:
+
+- Se lanzará una **ValidationException**.
+- El error describirá claramente el problema encontrado.
+- La aplicación terminará con un código de error (`Environment.Exit(1)`).
+
+Ejemplo de salida si una clase no tiene cobertura de prueba:
+
+```plaintext
+Validation failed: Test coverage validation failed: The following classes are missing corresponding test classes: CustomerService, OrderManager.
 ```
 
-> El validador comprobará automáticamente y reportará cualquier problema en el proyecto antes de compilar.
+---
+
+## 📢 Notas
+
+- Solo existe un único archivo ejecutable con declaraciones de nivel superior (Top-Level Program.cs), garantizando una ejecución simple y eficiente.
+- Archivos generados como `.Designer.cs`, `.g.cs` y `.AssemblyInfo.cs` son excluidos automáticamente de la validación.
+- Todos los errores de validación son precisos y agrupados por tipo de error.
+
+---
+
+## 👨‍💻 Autor
+
+Desarrollado y mantenido por JuanMa.
+
+---
