@@ -8,8 +8,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="README_RUN_VALIDATOR_ES.md" />
-  </ItemGroup>
-
 </Project>
