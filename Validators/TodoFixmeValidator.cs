@@ -12,19 +12,22 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// TodoFixmeValidator.ValidateTodoFixme("../MySolution");
 /// ]]>
 /// </example>
-public static class TodoFixmeValidator
+public static partial class TodoFixmeValidator
 {
-    private static readonly Regex _todoFixmeRegex = new(@"//\s*(TODO|FIXME)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@"//\s*(TODO|FIXME)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    private static partial Regex TodoFixmeRegex();
 
     /// <summary>
     /// Validates the absence of TODO and FIXME comments in source code files.
     /// </summary>
-    /// <param name="solutionDirectory">Root directory of the solution.</param>
     /// <param name="projectFilePath">Name of the main project.</param>
     /// <exception cref="ValidationException">Thrown if any TODO or FIXME comment is found.</exception>
-    public static void ValidateTodoFixme(string solutionDirectory, string projectFilePath)
+    public static void ValidateTodoFixme(string projectFilePath)
     {
         Console.WriteLine("Starting TODO/FIXME comments validation...");
+
+        if (string.IsNullOrWhiteSpace(projectFilePath) || string.IsNullOrEmpty(projectFilePath))
+            throw new ArgumentException("ProjectFile Directory can't be null, empty or whitespace.", nameof(projectFilePath));
 
         var _projectPath = Path.GetDirectoryName(projectFilePath);
 
@@ -48,7 +51,7 @@ public static class TodoFixmeValidator
         {
             var _lines = File.ReadLines(_filePath);
 
-            if (_lines.Any(line => _todoFixmeRegex.IsMatch(line)))
+            if (_lines.Any(line => TodoFixmeRegex().IsMatch(line)))
             {
                 _filesWithTodoFixme.Add(Path.GetFileName(_filePath));
             }

@@ -37,8 +37,8 @@ public class Program
             LangVersionValidator.ValidateLangVersion(_solutionDirectory, _projectFilePath);
             TestCoverageValidator.ValidateTestCoverage(_solutionDirectory, _projectFilePath);
             TestMethodPresenceValidator.ValidateTestMethodPresence(_solutionDirectory, _projectFilePath);
-            TodoFixmeValidator.ValidateTodoFixme(_solutionDirectory, _projectFilePath);
-            XmlDocValidator.ValidateXmlDocumentation(_solutionDirectory, _projectFilePath);
+            TodoFixmeValidator.ValidateTodoFixme(_projectFilePath);
+            XmlDocValidator.ValidateXmlDocumentation(_projectFilePath);
 
             Console.WriteLine("Pre-build validation completed successfully.");
         }
