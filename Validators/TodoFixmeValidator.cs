@@ -14,43 +14,19 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static class TodoFixmeValidator
 {
-    ///// <summary>
-    ///// Validates the presence of TODO or FIXME comments in source files, marking them as pending issues.
-    ///// </summary>
-    ///// <param name="solutionDirectory">Root path to the solution where files should be checked.</param>
-    //public static void ValidateTodoFixme(string solutionDirectory)
-    //{
-    //    Console.WriteLine("🔍 Starting Checking TODO / FIXME...");
-
-    //    var _csFiles = Directory.GetFiles(solutionDirectory, "*.cs", SearchOption.AllDirectories);
-
-    //    foreach (var _file in _csFiles)
-    //    {
-    //        Console.WriteLine($"📝 Checking TODO/FIXME in file: {_file}...");
-    //        var _lines = File.ReadAllLines(_file);
-
-    //        for (var _i = 0; _i < _lines.Length; _i++)
-    //        {
-    //            if (_lines[_i].Contains("TODO") || _lines[_i].Contains("FIXME"))
-    //            {
-    //                Console.WriteLine($"❌ {_file}: Unresolved TODO/FIXME found at line {_i + 1}: {_lines[_i].Trim()}");
-    //            }
-    //        }
-    //    }
-    //}
     private static readonly Regex _todoFixmeRegex = new(@"//\s*(TODO|FIXME)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Validates the absence of TODO and FIXME comments in source code files.
     /// </summary>
     /// <param name="solutionDirectory">Root directory of the solution.</param>
-    /// <param name="projectName">Name of the main project.</param>
+    /// <param name="projectFilePath">Name of the main project.</param>
     /// <exception cref="ValidationException">Thrown if any TODO or FIXME comment is found.</exception>
-    public static void ValidateTodoFixme(string solutionDirectory, string projectName)
+    public static void ValidateTodoFixme(string solutionDirectory, string projectFilePath)
     {
         Console.WriteLine("Starting TODO/FIXME comments validation...");
 
-        var _projectPath = Path.Combine(solutionDirectory, projectName);
+        var _projectPath = Path.GetDirectoryName(projectFilePath);
 
         if (!Directory.Exists(_projectPath))
         {

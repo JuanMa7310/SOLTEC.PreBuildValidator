@@ -14,49 +14,6 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static class XmlDocValidator
 {
-    ///// <summary>
-    ///// Performs XML documentation validation across all .cs files in the given solution directory.
-    ///// </summary>
-    ///// <param name="solutionDirectory">Path to the root directory of the solution.</param>
-    //public static void ValidateXmlDocumentation(string solutionDirectory)
-    //{
-    //    Console.WriteLine("🔍 Starting Checking XML documentation...");
-
-    //    var _csFiles = Directory.GetFiles(solutionDirectory, "*.cs", SearchOption.AllDirectories);
-
-    //    foreach (var _file in _csFiles)
-    //    {
-    //        var _lines = File.ReadAllLines(_file);
-    //        for (var _i = 0; _i < _lines.Length; _i++)
-    //        {
-    //            var _line = _lines[_i].Trim();
-
-    //            // Check for public class or struct or interface
-    //            if (Regex.IsMatch(_line, @"^(public\s+)?(class|struct|interface)\s+\w"))
-    //            {
-    //                if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
-    //                {
-    //                    Console.WriteLine($"❌ {_file}: Public class/interface/struct missing XML documentation at line {_i + 1}");
-    //                }
-    //            }
-
-    //            // Check for public method
-    //            if (Regex.IsMatch(_line, @"^public\s+(static\s+)?(\w+[\<\>\[\]]*\s+)+\w+\s*\("))
-    //            {
-    //                if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
-    //                {
-    //                    Console.WriteLine($"❌ {_file}: Public method missing XML documentation at line {_i + 1}");
-    //                }
-    //            }
-
-    //            // Optional: check for duplicate or malformed XML comments
-    //            if (_line.StartsWith("///") && !_line.Contains("<summary>") && !_line.Contains("</summary>") && !_line.Contains("<") && !_line.Contains(">"))
-    //            {
-    //                Console.WriteLine($"⚠️ {_file}: Possible malformed XML documentation at line {_i + 1}");
-    //            }
-    //        }
-    //    }
-    //}
     private static readonly Regex _publicProtectedMemberRegex = new(@"\b(public|protected)\s+(class|interface|struct|enum|delegate|void|\w+)\s+\w+", RegexOptions.Compiled);
     private static readonly Regex _xmlDocCommentRegex = new(@"^\s*///", RegexOptions.Compiled);
 
@@ -64,13 +21,13 @@ public static class XmlDocValidator
     /// Validates that XML documentation exists for public/protected classes, methods, and properties.
     /// </summary>
     /// <param name="solutionDirectory">Root directory of the solution.</param>
-    /// <param name="projectName">Name of the main project.</param>
+    /// <param name="projectFilePath">Name of the main project.</param>
     /// <exception cref="ValidationException">Thrown if missing XML documentation is found.</exception>
-    public static void ValidateXmlDocumentation(string solutionDirectory, string projectName)
+    public static void ValidateXmlDocumentation(string solutionDirectory, string projectFilePath)
     {
         Console.WriteLine("Starting XML documentation validation...");
 
-        var _projectPath = Path.Combine(solutionDirectory, projectName);
+        var _projectPath = Path.GetDirectoryName(projectFilePath);
 
         if (!Directory.Exists(_projectPath))
         {
