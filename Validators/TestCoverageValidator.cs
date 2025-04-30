@@ -13,9 +13,14 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static partial class TestCoverageValidator
 {
-    private static readonly Regex _classRegex = new(@"\b(public|protected)\s+(partial\s+)?class\s+(\w+(\s*<[^>]+>)?)", RegexOptions.Compiled);
-    private static readonly Regex _methodRegex = new(@"public\s+[^=]+\([^)]*\)", RegexOptions.Compiled);
-    private static readonly Regex _enumRegex = new(@"(public|protected)?\s*enum\s+\w+", RegexOptions.Compiled);
+    [GeneratedRegex(@"\b(public|protected)\s+(partial\s+)?class\s+(\w+)", RegexOptions.Compiled)]
+    private static partial Regex ClassRegex();
+    [GeneratedRegex(@"public\s+[^=]+\([^)]*\)", RegexOptions.Compiled)]
+    private static partial Regex MethodRegex();
+    [GeneratedRegex(@"(public|protected)?\s*enum\s+\w+", RegexOptions.Compiled)]
+    private static partial Regex EnumRegex();
+    [GeneratedRegex(@"<(.+?)>")]
+    private static partial Regex GenericTypeRegex();
 
     /// <summary>
     /// Validates that logic classes are covered by corresponding unit tests.
@@ -26,8 +31,12 @@ public static partial class TestCoverageValidator
     public static void ValidateTestCoverage(string solutionDirectory, string projectFilePath)
     {
         Console.WriteLine("Starting test coverage validation...");
+
+        if (string.IsNullOrWhiteSpace(projectFilePath) || string.IsNullOrEmpty(projectFilePath))
+            throw new ArgumentException("ProjectFile Directory can't be null, empty or whitespace.", nameof(projectFilePath));
+
         var _projectDirectoryPath = Path.GetDirectoryName(projectFilePath);
-        var _projectFiles = Directory.GetFiles(_projectDirectoryPath, "*.cs", SearchOption.AllDirectories)
+        var _projectFiles = Directory.GetFiles(_projectDirectoryPath!, "*.cs", SearchOption.AllDirectories)
             .Where(f => !IsGeneratedFile(f))
             .ToList();
         if (_projectFiles.Count == 0)
@@ -41,15 +50,15 @@ public static partial class TestCoverageValidator
             for (int i = 0; i < _lines.Length; i++)
             {
                 var _line = _lines[i];
-                if (_enumRegex.IsMatch(_line)) 
+                if (EnumRegex().IsMatch(_line)) 
                     continue;
-                var _match = _classRegex.Match(_line);
+                var _match = ClassRegex().Match(_line);
                 if (_match.Success)
                 {
                     var _className = _match.Groups[3].Value;
                     if (_className.Contains('<'))
                     {
-                        _className = Regex.Replace(_className, "<(.+?)>", m =>
+                        _className = GenericTypeRegex().Replace(_className, m =>
                         {
                             var types = m.Groups[1].Value
                                 .Replace(" ", "")       // eliminar espacios
@@ -70,7 +79,7 @@ public static partial class TestCoverageValidator
                             _braceCount--;
                         if (_braceCount <= 0) 
                             break;
-                        if (_methodRegex.IsMatch(_lines[j]))
+                        if (MethodRegex().IsMatch(_lines[j]))
                         {
                             _hasMethod = true;
                             i = ++j;

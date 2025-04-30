@@ -12,9 +12,10 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// TestMethodPresenceValidator.ValidateTestMethods("../MySolution");
 /// ]]>
 /// </example>
-public static class TestMethodPresenceValidator
+public static partial class TestMethodPresenceValidator
 {
-    private static readonly Regex _methodRegex = new(@"\b(public|protected)\s+(async\s+)?(\w+\s+)+(\w+)\s*\(", RegexOptions.Compiled);
+    [GeneratedRegex(@"\b(public|protected)\s+(async\s+)?(\w+\s+)+(\w+)\s*\(", RegexOptions.Compiled)]
+    private static partial Regex MethodRegex();
 
     /// <summary>
     /// Validates the presence of test methods for each public/protected method.
@@ -25,6 +26,9 @@ public static class TestMethodPresenceValidator
     public static void ValidateTestMethodPresence(string solutionDirectory, string projectFilePath)
     {
         Console.WriteLine("Starting test method presence validation...");
+
+        if (string.IsNullOrWhiteSpace(projectFilePath) || string.IsNullOrEmpty(projectFilePath))
+            throw new ArgumentException("ProjectFile Directory can't be null, empty or whitespace.", nameof(projectFilePath));
 
         var _projectPath = Path.GetDirectoryName(projectFilePath);
         
@@ -46,7 +50,7 @@ public static class TestMethodPresenceValidator
         {
             foreach (var _line in File.ReadLines(_filePath))
             {
-                var _match = _methodRegex.Match(_line);
+                var _match = MethodRegex().Match(_line);
                 if (_match.Success)
                 {
                     var _methodName = _match.Groups[4].Value;

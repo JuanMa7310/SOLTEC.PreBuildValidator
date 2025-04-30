@@ -12,20 +12,24 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// XmlDocValidator.ValidateXmlDocumentation("../MySolution");
 /// ]]>
 /// </example>
-public static class XmlDocValidator
+public static partial class XmlDocValidator
 {
-    private static readonly Regex _publicProtectedMemberRegex = new(@"\b(public|protected)\s+(class|interface|struct|enum|delegate|void|\w+)\s+\w+", RegexOptions.Compiled);
-    private static readonly Regex _xmlDocCommentRegex = new(@"^\s*///", RegexOptions.Compiled);
+    [GeneratedRegex(@"\b(public|protected)\s+(class|interface|struct|enum|delegate|void|\w+)\s+\w+", RegexOptions.Compiled)]
+    private static partial Regex PublicProtectedMemberRegex();
+    [GeneratedRegex(@"^\s*///", RegexOptions.Compiled)]
+    private static partial Regex XmlDocCommentRegex();
 
     /// <summary>
     /// Validates that XML documentation exists for public/protected classes, methods, and properties.
     /// </summary>
-    /// <param name="solutionDirectory">Root directory of the solution.</param>
     /// <param name="projectFilePath">Name of the main project.</param>
     /// <exception cref="ValidationException">Thrown if missing XML documentation is found.</exception>
-    public static void ValidateXmlDocumentation(string solutionDirectory, string projectFilePath)
+    public static void ValidateXmlDocumentation(string projectFilePath)
     {
         Console.WriteLine("Starting XML documentation validation...");
+
+        if (string.IsNullOrWhiteSpace(projectFilePath) || string.IsNullOrEmpty(projectFilePath))
+            throw new ArgumentException("ProjectFile Directory can't be null, empty or whitespace.", nameof(projectFilePath));
 
         var _projectPath = Path.GetDirectoryName(projectFilePath);
 
@@ -54,7 +58,7 @@ public static class XmlDocValidator
             {
                 var _line = _lines[_length];
 
-                if (_publicProtectedMemberRegex.IsMatch(_line))
+                if (PublicProtectedMemberRegex().IsMatch(_line))
                 {
                     bool _hasXmlDoc = false;
 
@@ -66,7 +70,7 @@ public static class XmlDocValidator
                         if (string.IsNullOrWhiteSpace(_previousLine))
                             continue;
 
-                        if (_xmlDocCommentRegex.IsMatch(_previousLine))
+                        if (XmlDocCommentRegex().IsMatch(_previousLine))
                         {
                             _hasXmlDoc = true;
                             break;
