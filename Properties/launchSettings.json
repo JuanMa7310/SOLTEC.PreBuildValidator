@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SOLTEC.PreBuildValidator": {
+      "commandName": "Project",
+      "commandLineArgs": "SOLTEC.Core"
+    }
+  }
+}
