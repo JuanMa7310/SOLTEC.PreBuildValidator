@@ -13,47 +13,6 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static class LangVersionValidator
 {
-    ///// <summary>
-    ///// The required C# language version.
-    ///// </summary>
-    //private const string gcRequiredLangVersion = "12.0";
-
-    ///// <summary>
-    ///// Validates that all .csproj files in the solution have LangVersion set to 12.0 and Nullable enabled.
-    ///// </summary>
-    ///// <param name="solutionDirectory">Path to the solution directory to scan.</param>
-    //public static void ValidateLangVersion(string solutionDirectory)
-    //{
-    //    Console.WriteLine("🔍 Starting Checking LangVersion and Nullable in project...");
-
-    //    var _projectFiles = Directory.GetFiles(solutionDirectory, "*.csproj", SearchOption.AllDirectories);
-
-    //    foreach (var _file in _projectFiles)
-    //    {
-    //        Console.WriteLine($"📝 Checking LangVersion and Nullable in project: {_file}...");
-
-    //        try
-    //        {
-    //            var _xdoc = XDocument.Load(_file);
-    //            var _ns = _xdoc.Root?.Name.Namespace;
-    //            var _langVersion = _xdoc.Descendants(_ns + "LangVersion").FirstOrDefault()?.Value?.Trim();
-    //            var _nullable = _xdoc.Descendants(_ns + "Nullable").FirstOrDefault()?.Value?.Trim();
-
-    //            if (_langVersion != gcRequiredLangVersion)
-    //            {
-    //                Console.WriteLine($"❌ {_file}: LangVersion must be {gcRequiredLangVersion} (actual: {_langVersion ?? "NOT DEFINED"})");
-    //            }
-    //            if (_nullable?.ToLowerInvariant() != "enable")
-    //            {
-    //                Console.WriteLine($"❌ {_file}: Nullable must be enabled (actual: {_nullable ?? "NOT DEFINED"})");
-    //            }
-    //        }
-    //        catch (Exception _ex)
-    //        {
-    //            Console.WriteLine($"❌ Error parsing {_file}: {_ex.Message}");
-    //        }
-    //    }
-    //}
 
     /// <summary>
     /// The required C# language version.
@@ -63,14 +22,14 @@ public static class LangVersionValidator
     /// <summary>
     /// Validates the presence of LangVersion in the project file (.csproj).
     /// </summary>
-    /// <param name="solutionDirectory">Root directory of the solution.</param>
+    /// <param name="projectDirectory">Root directory of the solution.</param>
     /// <param name="projectName">Name of the main project (e.g., SOLTEC.Core).</param>
     /// <exception cref="ValidationException">Thrown if LangVersion is missing or unreadable.</exception>
-    public static void ValidateLangVersion(string solutionDirectory, string projectName)
+    public static void ValidateLangVersion(string projectDirectory, string projectName)
     {
         Console.WriteLine("Starting LangVersion validation...");
 
-        var _csprojPath = Path.Combine(solutionDirectory, projectName, $"{projectName}.csproj");
+        var _csprojPath = Path.Combine(projectDirectory, projectName);
 
         if (!File.Exists(_csprojPath))
         {

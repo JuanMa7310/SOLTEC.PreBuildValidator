@@ -25,15 +25,12 @@ public class Program
             Console.WriteLine("Starting PreBuild Validator...");
 
             // Get solution/project name from arguments
-            var solutionName = args.Length > 0 ? args[0] : ".";
-
-            // Locate the .csproj file properly
-            var _projectFilePath = ProjectLocator.FindProjectFile(solutionName);
-            var _solutionDirectory = Path.GetDirectoryName(_projectFilePath)
-                ?? throw new InvalidOperationException("Could not determine solution directory.");
+            var _solutionDirectory = ProjectLocator.FindSolutionDirectory();
+            var _projectName = args.Length > 0 ? args[0] : throw new ArgumentException("Missing required argument: project name");
+            var _projectFilePath = ProjectLocator.FindProjectFile(_solutionDirectory, _projectName);
 
             Console.WriteLine($"Solution Directory: {_solutionDirectory}");
-            Console.WriteLine($"Project to validate: {_projectFilePath}");
+            Console.WriteLine($"Project Directory: {_projectFilePath}");
 
             LangVersionValidator.ValidateLangVersion(_solutionDirectory, _projectFilePath);
             TestCoverageValidator.ValidateTestCoverage(_solutionDirectory, _projectFilePath);
@@ -45,12 +42,16 @@ public class Program
         }
         catch (ValidationException _vex)
         {
-            Console.WriteLine($"Validation failed: {_vex.Message}");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"✖ Pre-build validation failed: {_vex.Message}");
+            Console.ResetColor();
             Environment.Exit(1);
         }
         catch (Exception _ex)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Unexpected error: {_ex.Message}");
+            Console.ResetColor();
             Environment.Exit(1);
         }
     }
