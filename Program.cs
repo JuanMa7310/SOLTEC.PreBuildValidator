@@ -1,6 +1,7 @@
 ﻿using SOLTEC.PreBuildValidator.Exceptions;
 using SOLTEC.PreBuildValidator.Helpers;
 using SOLTEC.PreBuildValidator.Validators;
+using System.Text;
 
 namespace SOLTEC.PreBuildValidator;
 
@@ -20,6 +21,7 @@ public class Program
     /// </summary>
     private static void Main(string[] args)
     {
+        Console.OutputEncoding = Encoding.UTF8;
         try
         {
             Console.WriteLine("Starting PreBuild Validator...");
