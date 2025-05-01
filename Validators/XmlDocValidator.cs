@@ -14,7 +14,7 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static partial class XmlDocValidator
 {
-    [GeneratedRegex(@"\b(public|protected)\s+(class|interface|struct|enum|delegate|void|\w+)\s+\w+", RegexOptions.Compiled)]
+    [GeneratedRegex(@"\b(public|internal|protected)\s+(class|interface|struct|enum|delegate|void|\w+)\s+\w+", RegexOptions.Compiled)]
     private static partial Regex PublicProtectedMemberRegex();
     [GeneratedRegex(@"^\s*///", RegexOptions.Compiled)]
     private static partial Regex XmlDocCommentRegex();
@@ -27,59 +27,47 @@ public static partial class XmlDocValidator
     public static void ValidateXmlDocumentation(string projectFilePath)
     {
         Console.WriteLine("Starting XML documentation validation...");
-
         if (string.IsNullOrWhiteSpace(projectFilePath) || string.IsNullOrEmpty(projectFilePath))
+        {
             throw new ArgumentException("ProjectFile Directory can't be null, empty or whitespace.", nameof(projectFilePath));
-
+        }
         var _projectPath = Path.GetDirectoryName(projectFilePath);
-
         if (!Directory.Exists(_projectPath))
         {
             throw new ValidationException($"XML documentation validation failed: Project path '{_projectPath}' not found.");
         }
-
         var _projectFiles = Directory.GetFiles(_projectPath, "*.cs", SearchOption.AllDirectories)
             .Where(f => !IsGeneratedFile(f))
             .ToList();
-
         if (_projectFiles.Count == 0)
         {
             Console.WriteLine("No source files found to validate XML documentation.");
             return;
         }
-
         var _membersMissingDoc = new List<string>();
-
         foreach (var _filePath in _projectFiles)
         {
             var _lines = File.ReadAllLines(_filePath);
-
             for (int _length = 0; _length < _lines.Length; _length++)
             {
                 var _line = _lines[_length];
-
                 if (PublicProtectedMemberRegex().IsMatch(_line))
                 {
                     bool _hasXmlDoc = false;
-
                     // Look backwards to see if there's a "///" comment immediately above
                     for (int _j = _length - 1; _j >= 0; _j--)
                     {
                         var _previousLine = _lines[_j].Trim();
-
                         if (string.IsNullOrWhiteSpace(_previousLine))
                             continue;
-
                         if (XmlDocCommentRegex().IsMatch(_previousLine))
                         {
                             _hasXmlDoc = true;
                             break;
                         }
-
                         // If we find a non-comment line before a "///", assume missing doc
                         break;
                     }
-
                     if (!_hasXmlDoc)
                     {
                         _membersMissingDoc.Add($"{Path.GetFileName(_filePath)}: Line {_length + 1} - {_line.Trim()}");
@@ -87,14 +75,12 @@ public static partial class XmlDocValidator
                 }
             }
         }
-
         if (_membersMissingDoc.Count != 0)
         {
             throw new ValidationException(
                 $"XML documentation validation failed: Missing documentation for the following members:\n{string.Join("\n", _membersMissingDoc)}"
             );
         }
-
         Console.WriteLine("XML documentation validation passed.");
     }
 
