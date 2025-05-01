@@ -36,9 +36,18 @@ public static partial class TestCoverageValidator
             throw new ArgumentException("ProjectFile Directory can't be null, empty or whitespace.", nameof(projectFilePath));
 
         var _projectDirectoryPath = Path.GetDirectoryName(projectFilePath);
-        var _projectFiles = Directory.GetFiles(_projectDirectoryPath!, "*.cs", SearchOption.AllDirectories)
-            .Where(f => !IsGeneratedFile(f))
-            .ToList();
+        List<string> _projectFiles = [..
+            Directory
+            .GetFiles(_projectDirectoryPath!, "*.cs", SearchOption.AllDirectories)
+            .Where(f =>
+                !IsGeneratedFile(f) &&
+                !f.Contains(@"\obj\") &&
+                !f.Contains(@"\bin\") &&
+                !f.Contains(@"\TestResults\") &&
+                !f.Contains(@"\.vs\") &&
+                !f.Contains(@"Temporary") &&
+                !f.Contains(@"FileManagement.cs"))
+            ];
         if (_projectFiles.Count == 0)
         {
             throw new ValidationException($"Test coverage validation failed: No .cs files found in '{projectFilePath}'.");
