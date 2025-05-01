@@ -13,11 +13,11 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static partial class TestCoverageValidator
 {
-    [GeneratedRegex(@"\b(public|protected)\s+(partial\s+)?class\s+(\w+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"\b(public|internal|protected)\s+(partial\s+)?class\s+(\w+)", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
     private static partial Regex ClassRegex();
     [GeneratedRegex(@"public\s+[^=]+\([^)]*\)", RegexOptions.Compiled)]
     private static partial Regex MethodRegex();
-    [GeneratedRegex(@"(public|protected)?\s*enum\s+\w+", RegexOptions.Compiled)]
+    [GeneratedRegex(@"(public|internal|protected)?\s*enum\s+\w+", RegexOptions.Compiled)]
     private static partial Regex EnumRegex();
     [GeneratedRegex(@"<(.+?)>")]
     private static partial Regex GenericTypeRegex();
@@ -39,14 +39,14 @@ public static partial class TestCoverageValidator
         List<string> _projectFiles = [..
             Directory
             .GetFiles(_projectDirectoryPath!, "*.cs", SearchOption.AllDirectories)
-            .Where(f =>
-                !IsGeneratedFile(f) &&
-                !f.Contains(@"\obj\") &&
-                !f.Contains(@"\bin\") &&
-                !f.Contains(@"\TestResults\") &&
-                !f.Contains(@"\.vs\") &&
-                !f.Contains(@"Temporary") &&
-                !f.Contains(@"FileManagement.cs"))
+            .Where(_f =>
+                !IsGeneratedFile(_f) &&
+                !_f.Contains(@"\obj\") &&
+                !_f.Contains(@"\bin\") &&
+                !_f.Contains(@"\TestResults\") &&
+                !_f.Contains(@"\.vs\") &&
+                !_f.Contains(@"Temporary") &&
+                !_f.Contains(@"FileManagement.cs"))
             ];
         if (_projectFiles.Count == 0)
         {

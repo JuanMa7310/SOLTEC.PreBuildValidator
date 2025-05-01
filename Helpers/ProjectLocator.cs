@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SOLTEC.PreBuildValidator.Helpers;
+﻿namespace SOLTEC.PreBuildValidator.Helpers;
 
 /// <summary>
 /// Helper class to locate the project file (.csproj) based on the solution name provided.
@@ -16,7 +14,7 @@ public static class ProjectLocator
     /// │       └── PROJECT.csproj
     /// </summary>
     /// <param name="solutionDirectory">The root directory where the repository was cloned.</param>
-    /// <param name="projectName">The name of the project (e.g., SOLTEC.Core).</param>
+    /// <param name="projectName">The name of the project.</param>
     /// <returns>The full path to the project file.</returns>
     /// <exception cref="Exception">Thrown if the project file cannot be found.</exception>
     public static string FindProjectFile(string solutionDirectory, string projectName)

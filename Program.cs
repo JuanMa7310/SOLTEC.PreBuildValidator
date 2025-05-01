@@ -24,23 +24,25 @@ public class Program
         Console.OutputEncoding = Encoding.UTF8;
         try
         {
-            Console.WriteLine("Starting PreBuild Validator...");
+            var _projectName = args.Length > 0 ? args[0] : throw new ArgumentException("Missing required argument: project name");
+
+            Console.WriteLine($"Starting PreBuild Validator {_projectName}...");
 
             // Get solution/project name from arguments
             var _solutionDirectory = ProjectLocator.FindSolutionDirectory();
-            var _projectName = args.Length > 0 ? args[0] : throw new ArgumentException("Missing required argument: project name");
             var _projectFilePath = ProjectLocator.FindProjectFile(_solutionDirectory, _projectName);
 
             Console.WriteLine($"Solution Directory: {_solutionDirectory}");
             Console.WriteLine($"Project Directory: {_projectFilePath}");
 
             LangVersionValidator.ValidateLangVersion(_solutionDirectory, _projectFilePath);
+            ClassFilenameMatchValidator.ValidateClassNameMatchesFilename(_solutionDirectory, _projectFilePath);
             TestCoverageValidator.ValidateTestCoverage(_solutionDirectory, _projectFilePath);
             TestMethodPresenceValidator.ValidateTestMethodPresence(_solutionDirectory, _projectFilePath);
             TodoFixmeValidator.ValidateTodoFixme(_projectFilePath);
             XmlDocValidator.ValidateXmlDocumentation(_projectFilePath);
 
-            Console.WriteLine("Pre-build validation completed successfully.");
+            Console.WriteLine($"Pre-build validation {_projectName} completed successfully.");
         }
         catch (ValidationException _vex)
         {

@@ -14,7 +14,7 @@ namespace SOLTEC.PreBuildValidator.Validators;
 /// </example>
 public static partial class TestMethodPresenceValidator
 {
-    [GeneratedRegex(@"\b(public|protected)\s+(async\s+)?(\w+\s+)+(\w+)\s*\(", RegexOptions.Compiled)]
+    [GeneratedRegex(@"\b(public|internal|protected)\s+(async\s+)?(\w+\s+)+(\w+)\s*\(", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
     private static partial Regex MethodRegex();
 
     /// <summary>

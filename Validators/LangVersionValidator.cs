@@ -22,14 +22,14 @@ public static class LangVersionValidator
     /// <summary>
     /// Validates the presence of LangVersion in the project file (.csproj).
     /// </summary>
-    /// <param name="projectDirectory">Root directory of the solution.</param>
-    /// <param name="projectName">Name of the main project (e.g., SOLTEC.Core).</param>
+    /// <param name="solutionDirectory">Root directory of the solution.</param>
+    /// <param name="projectFilePath">Name of the project and Path to validate.</param>
     /// <exception cref="ValidationException">Thrown if LangVersion is missing or unreadable.</exception>
-    public static void ValidateLangVersion(string projectDirectory, string projectName)
+    public static void ValidateLangVersion(string solutionDirectory, string projectFilePath)
     {
         Console.WriteLine("Starting LangVersion validation...");
 
-        var _csprojPath = Path.Combine(projectDirectory, projectName);
+        var _csprojPath = Path.Combine(solutionDirectory, projectFilePath);
 
         if (!File.Exists(_csprojPath))
         {
